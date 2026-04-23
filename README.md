@@ -217,6 +217,12 @@ stellar contract invoke --id YOUR_CONTRACT_ID --source-account alice --network t
 5. Confirm the transaction link opens in Stellar Expert.
 6. Confirm the public contract activity feed refreshes with new ExperimentX events.
 
+## Current Status Note
+
+- Local contract tests pass, including the compliance flow, and the frontend build and CI pipeline are green.
+- The latest live testnet deployment and profile or experiment creation writes are working.
+- `log_compliance` is still hitting a Soroban testnet-only runtime trap when invoked against the live deployed contract, even though the same path passes in local contract tests. This needs one more round of live-chain debugging before the write flow is fully production-safe.
+
 ## Screenshots
 
 - Desktop capture: `UI.png`
