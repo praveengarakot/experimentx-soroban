@@ -1,0 +1,24 @@
+{
+  "name": "experimentx",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "frontend"
+  ],
+  "scripts": {
+    "dev": "npm --workspace frontend run dev",
+    "test": "npm run contract:test",
+    "contract:test": "cargo test",
+    "contract:build": "stellar contract build",
+    "contract:wasm": "cargo build --target wasm32v1-none --release -p experiment_x",
+    "contract:check": "cargo fmt --all --check && npm run contract:test && npm run contract:wasm",
+    "contract:deploy": "node scripts/deploy-stellar.mjs",
+    "export:frontend": "node scripts/export-frontend-config.mjs",
+    "build:frontend": "npm run export:frontend && npm --workspace frontend run build",
+    "build": "npm run contract:build && npm run export:frontend && npm --workspace frontend run build",
+    "lint": "npm --workspace frontend run lint"
+  },
+  "devDependencies": {
+    "dotenv": "^16.4.5"
+  }
+}

@@ -1,0 +1,41 @@
+name: ci
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Rust
+        run: |
+          rustup toolchain install stable --profile minimal
+          rustup default stable
+          rustup target add wasm32v1-none
+      - name: Rust format check
+        run: cargo fmt --all --check
+      - name: Contract tests
+        run: cargo test
+      - name: Contract wasm build
+        run: cargo build --target wasm32v1-none --release -p experiment_x
+
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Frontend lint
+        run: npm run lint
+      - name: Frontend build
+        run: npm run build:frontend
