@@ -225,11 +225,17 @@ stellar contract invoke --id YOUR_CONTRACT_ID --source-account alice --network t
 
 ## Screenshots
 
-- Desktop capture: `UI.png`
-- Mobile capture: `mobile.png`
-- CI/CD capture: `cicd.png`
+### Desktop UI
 
-These assets still exist in the repo, but they should be refreshed after the next live ExperimentX deployment so the screenshots match the new brand and interface exactly.
+![Desktop UI](./ui%20ss.png)
+
+### Mobile UI
+
+![Mobile UI](./mobile%20ss.png)
+
+### CI/CD Pipeline
+
+![CI/CD Pipeline](./ci%20cd%20ss.png)
 
 ## Inter-contract and Token Notes
 
