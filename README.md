@@ -7,8 +7,7 @@ ExperimentX is a Soroban mini-dApp for self-experiment tracking on Stellar. User
 ## Submission Links
 
 - Public repository: `https://github.com/praveengarakot/experimentx-soroban`
-- Live demo: `https://focusforge-ledger-ten.vercel.app`
-- Vercel production deployment: `https://focusforge-ledger-cvk0715tp-deep-sahas-projects-5b5ba27c.vercel.app`
+- Vercel production deployment: `https://experimentx-ten.vercel.app`
 - CI workflow: `https://github.com/praveengarakot/experimentx-soroban/actions/workflows/ci.yml`
 
 ## Overview
