@@ -149,18 +149,19 @@ impl ExperimentX {
             .persistent()
             .has(&DataKey::RegisteredExperimenter(experimenter.clone()));
 
-        let mut profile = read_profile_optional(&env, &experimenter).unwrap_or(ExperimenterProfile {
-            display_name: display_name.clone(),
-            created_at: now,
-            experiment_count: 0,
-            active_experiment_count: 0,
-            completed_experiment_count: 0,
-            successful_experiment_count: 0,
-            failed_experiment_count: 0,
-            total_check_ins: 0,
-            current_streak: 0,
-            last_compliance_day: 0,
-        });
+        let mut profile =
+            read_profile_optional(&env, &experimenter).unwrap_or(ExperimenterProfile {
+                display_name: display_name.clone(),
+                created_at: now,
+                experiment_count: 0,
+                active_experiment_count: 0,
+                completed_experiment_count: 0,
+                successful_experiment_count: 0,
+                failed_experiment_count: 0,
+                total_check_ins: 0,
+                current_streak: 0,
+                last_compliance_day: 0,
+            });
 
         profile.display_name = display_name.clone();
         write_profile(&env, &experimenter, &profile);
@@ -276,7 +277,10 @@ impl ExperimentX {
 
         let today = current_day(&env);
         sync_experiment_progress(&mut experiment, today);
-        assert!(today > experiment_end_day(&experiment), "Experiment still active");
+        assert!(
+            today > experiment_end_day(&experiment),
+            "Experiment still active"
+        );
 
         finalize_experiment_state(
             &env,
@@ -367,10 +371,16 @@ fn read_experiment_required(env: &Env, experimenter: &Address, experiment_id: u3
         .unwrap_or_else(|| panic!("Experiment not found"))
 }
 
-fn write_experiment(env: &Env, experimenter: &Address, experiment_id: u32, experiment: &Experiment) {
-    env.storage()
-        .persistent()
-        .set(&DataKey::Experiment(experimenter.clone(), experiment_id), experiment);
+fn write_experiment(
+    env: &Env,
+    experimenter: &Address,
+    experiment_id: u32,
+    experiment: &Experiment,
+) {
+    env.storage().persistent().set(
+        &DataKey::Experiment(experimenter.clone(), experiment_id),
+        experiment,
+    );
 }
 
 fn default_global_stats() -> GlobalStats {
@@ -398,9 +408,10 @@ fn write_global_stats(env: &Env, stats: &GlobalStats) {
 }
 
 fn register_experimenter(env: &Env, experimenter: &Address, created_at: u64) {
-    env.storage()
-        .persistent()
-        .set(&DataKey::RegisteredExperimenter(experimenter.clone()), &true);
+    env.storage().persistent().set(
+        &DataKey::RegisteredExperimenter(experimenter.clone()),
+        &true,
+    );
 
     let mut stats = read_global_stats(env);
     stats.experimenter_count += 1;
@@ -423,7 +434,11 @@ fn record_check_in(env: &Env, timestamp: u64) {
     write_global_stats(env, &stats);
 }
 
-fn settle_overdue_experiments(env: &Env, experimenter: &Address, profile: &mut ExperimenterProfile) {
+fn settle_overdue_experiments(
+    env: &Env,
+    experimenter: &Address,
+    profile: &mut ExperimenterProfile,
+) {
     let today = current_day(env);
     let timestamp = env.ledger().timestamp();
 
@@ -538,7 +553,11 @@ fn sync_experiment_progress(experiment: &mut Experiment, today: u64) {
     }
 
     let end_day = experiment_end_day(experiment);
-    let missed_until = if today - 1 < end_day { today - 1 } else { end_day };
+    let missed_until = if today - 1 < end_day {
+        today - 1
+    } else {
+        end_day
+    };
     if missed_until < first_untracked_day {
         return;
     }
@@ -801,6 +820,9 @@ mod test {
             .count();
 
         assert_eq!(matching_events, 1);
-        assert_eq!(client.get_experiment(&experimenter, &0).status, STATUS_SUCCEEDED);
+        assert_eq!(
+            client.get_experiment(&experimenter, &0).status,
+            STATUS_SUCCEEDED
+        );
     }
 }
