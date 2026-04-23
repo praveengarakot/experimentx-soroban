@@ -10,6 +10,20 @@ ExperimentX is a Soroban mini-dApp for self-experiment tracking on Stellar. User
 - Vercel production deployment: `https://experimentx-ten.vercel.app`
 - CI workflow: `https://github.com/praveengarakot/experimentx-soroban/actions/workflows/ci.yml`
 
+## Screenshots
+
+### Desktop UI
+
+![Desktop UI](./ui%20ss.png)
+
+### Mobile UI
+
+![Mobile UI](./mobile%20ss.png)
+
+### CI/CD Pipeline
+
+![CI/CD Pipeline](./ci%20cd%20ss.png)
+
 ## Overview
 
 ExperimentX turns habit-change experiments into wallet-backed public records. The current implementation supports:
@@ -221,20 +235,6 @@ stellar contract invoke --id YOUR_CONTRACT_ID --source-account alice --network t
 - Local contract tests pass, including the compliance flow, and the frontend build and CI pipeline are green.
 - The latest live testnet deployment and profile or experiment creation writes are working.
 - `log_compliance` is still hitting a Soroban testnet-only runtime trap when invoked against the live deployed contract, even though the same path passes in local contract tests. This needs one more round of live-chain debugging before the write flow is fully production-safe.
-
-## Screenshots
-
-### Desktop UI
-
-![Desktop UI](./ui%20ss.png)
-
-### Mobile UI
-
-![Mobile UI](./mobile%20ss.png)
-
-### CI/CD Pipeline
-
-![CI/CD Pipeline](./ci%20cd%20ss.png)
 
 ## Inter-contract and Token Notes
 
