@@ -9,7 +9,9 @@ import {
   connectWallet,
   contractLimits,
   createExperiment,
+  disconnectWallet,
   discoverWalletState,
+  fetchXlmBalance,
   finalizeExperiment,
   formatDate,
   formatDateTime,
@@ -27,6 +29,7 @@ import {
   readGlobalStats,
   readRecentLogs,
   saveProfile,
+  sendXlmTransaction,
   shortAddress,
   statusLabel
 } from "./lib/experimentX";
@@ -137,6 +140,10 @@ export default function App() {
     experimentId: "",
     compliant: "true"
   });
+  const [sendXlmForm, setSendXlmForm] = useState({
+    destination: "",
+    amount: ""
+  });
 
   useEffect(() => {
     let isMounted = true;
@@ -204,6 +211,13 @@ export default function App() {
     queryKey: ["contract-events", configuredContractId],
     queryFn: () => readContractEvents(8),
     enabled: contractReady,
+    refetchInterval: 15_000
+  });
+
+  const balanceQuery = useQuery({
+    queryKey: ["xlm-balance", wallet.account, wallet.networkPassphrase],
+    queryFn: () => fetchXlmBalance(wallet.account),
+    enabled: Boolean(wallet.account) && !wrongNetwork,
     refetchInterval: 15_000
   });
 
@@ -365,11 +379,21 @@ export default function App() {
       )
   });
 
+  const sendXlmMutation = useMutation({
+    mutationFn: ({ destination, amount }) =>
+      runLedgerAction(
+        () => sendXlmTransaction(wallet.account, destination, amount),
+        "Sending XLM transaction on Stellar...",
+        "XLM transaction sent successfully."
+      )
+  });
+
   const anyMutationPending =
     saveProfileMutation.isPending ||
     createExperimentMutation.isPending ||
     logComplianceMutation.isPending ||
-    finalizeExperimentMutation.isPending;
+    finalizeExperimentMutation.isPending ||
+    sendXlmMutation.isPending;
 
   async function handleConnectWallet() {
     setWallet((current) => ({
@@ -392,6 +416,28 @@ export default function App() {
         error: parseError(error)
       }));
     }
+  }
+
+  function handleDisconnectWallet() {
+    setWallet(disconnectWallet());
+    queryClient.clear();
+  }
+
+  function handleSendXlmSubmit(event) {
+    event.preventDefault();
+    const destination = sendXlmForm.destination.trim();
+    const amount = sendXlmForm.amount.trim();
+
+    if (!destination || !amount) {
+      setTxState({
+        status: "error",
+        message: "Destination address and amount are required.",
+        hash: ""
+      });
+      return;
+    }
+
+    sendXlmMutation.mutate({ destination, amount });
   }
 
   function handleProfileSubmit(event) {
@@ -485,17 +531,24 @@ export default function App() {
           </p>
 
           <div className="hero-actions">
-            <button
-              className="button button-primary"
-              onClick={handleConnectWallet}
-              disabled={wallet.isConnecting}
-            >
-              {wallet.isConnecting
-                ? "Connecting..."
-                : wallet.account
-                  ? "Wallet Connected"
-                  : "Connect Freighter"}
-            </button>
+            {wallet.account && !wrongNetwork ? (
+              <span className="pill" style={{ borderColor: "#00f0ff", color: "#00f0ff", background: "rgba(0, 240, 255, 0.1)" }}>
+                {balanceQuery.data ? `${balanceQuery.data} XLM` : "Loading XLM..."}
+              </span>
+            ) : null}
+            {wallet.account ? (
+              <button className="button button-secondary" onClick={handleDisconnectWallet}>
+                Disconnect {shortAddress(wallet.account)}
+              </button>
+            ) : (
+              <button
+                className="button button-primary"
+                onClick={handleConnectWallet}
+                disabled={wallet.isConnecting}
+              >
+                {wallet.isConnecting ? "Connecting..." : "Connect Freighter"}
+              </button>
+            )}
             <div className="hero-badges">
               <span className="pill">Soroban-backed</span>
               <span className="pill">Public results</span>
@@ -788,6 +841,42 @@ export default function App() {
               disabled={anyMutationPending || !wallet.account || !activeExperiments.length || !contractReady}
             >
               {logComplianceMutation.isPending ? "Logging..." : "Log check-in"}
+            </button>
+          </form>
+        </Panel>
+
+        <Panel eyebrow="Wallet" title="Send XLM" body="Transfer native XLM on the testnet." tone="amber">
+          <form className="form-grid" onSubmit={handleSendXlmSubmit}>
+            <label>
+              <span>Destination Address</span>
+              <input
+                type="text"
+                placeholder="G..."
+                value={sendXlmForm.destination}
+                onChange={(event) =>
+                  setSendXlmForm((current) => ({ ...current, destination: event.target.value }))
+                }
+              />
+            </label>
+            <label>
+              <span>Amount (XLM)</span>
+              <input
+                type="number"
+                min="0.0000001"
+                step="any"
+                placeholder="10.5"
+                value={sendXlmForm.amount}
+                onChange={(event) =>
+                  setSendXlmForm((current) => ({ ...current, amount: event.target.value }))
+                }
+              />
+            </label>
+            <button
+              className="button button-primary"
+              type="submit"
+              disabled={anyMutationPending || !wallet.account || wrongNetwork}
+            >
+              {sendXlmMutation.isPending ? "Sending..." : "Send XLM"}
             </button>
           </form>
         </Panel>

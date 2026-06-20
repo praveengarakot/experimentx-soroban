@@ -499,3 +499,67 @@ export async function finalizeExperiment(account, experimentId) {
 
   return submitTransaction(tx);
 }
+
+export function disconnectWallet() {
+  return {
+    account: "",
+    network: "",
+    networkPassphrase: "",
+    rpcUrl: configuredRpcUrl,
+    isConnecting: false,
+    error: ""
+  };
+}
+
+export async function fetchXlmBalance(account) {
+  if (!account) return "0.00";
+  try {
+    const { Horizon } = await loadStellarSdk();
+    const server = new Horizon.Server("https://horizon-testnet.stellar.org");
+    const acct = await server.loadAccount(account);
+    const native = acct.balances.find((b) => b.asset_type === "native");
+    if (!native) return "0.00";
+    return parseFloat(native.balance).toFixed(2);
+  } catch (error) {
+    console.error("fetchXlmBalance error:", error);
+    return "0.00";
+  }
+}
+
+export async function sendXlmTransaction(account, destination, amount) {
+  const { Horizon, TransactionBuilder, Operation, Asset, Networks } = await loadStellarSdk();
+  const server = new Horizon.Server("https://horizon-testnet.stellar.org");
+  const sourceAccount = await server.loadAccount(account);
+
+  const tx = new TransactionBuilder(sourceAccount, {
+    fee: "10000",
+    networkPassphrase: Networks.TESTNET
+  })
+    .addOperation(
+      Operation.payment({
+        destination,
+        asset: Asset.native(),
+        amount: String(amount)
+      })
+    )
+    .setTimeout(30)
+    .build();
+
+  const signedTxResponse = await signTransaction(tx.toXDR(), {
+    network: "TESTNET",
+    networkPassphrase: Networks.TESTNET
+  });
+  
+  if (signedTxResponse.error) {
+      throw new Error(signedTxResponse.error);
+  }
+
+  const { TransactionBuilder: TB2 } = await loadStellarSdk();
+  const assembledTx = TB2.fromXDR(signedTxResponse, Networks.TESTNET);
+
+  const sentTx = await server.submitTransaction(assembledTx);
+  return {
+    hash: sentTx.hash,
+    result: sentTx
+  };
+}
