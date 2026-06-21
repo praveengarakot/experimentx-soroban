@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="dark">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -7,7 +7,97 @@
       name="description"
       content="ExperimentX is an on-chain self-experiment tracker for daily compliance, public results, and Soroban-backed behavior change."
     />
-    <title>ExperimentX</title>
+    <title>ExperimentX Dashboard | On-Chain Self-Experiment Studio</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500;700&amp;family=Outfit:wght@600;700;800&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+              "surface": "#0a1323",
+              "primary-fixed": "#7df4ff",
+              "surface-variant": "#2c3546",
+              "surface-bright": "#30394b",
+              "on-secondary": "#002e6a",
+              "secondary-container": "#0566d9",
+              "on-secondary-fixed": "#001a42",
+              "on-tertiary-fixed": "#1a1c20",
+              "tertiary-fixed-dim": "#c6c6cc",
+              "primary-fixed-dim": "#00dbe9",
+              "surface-container-highest": "#2c3546",
+              "tertiary-container": "#d9d9df",
+              "primary": "#dbfcff",
+              "surface-tint": "#00dbe9",
+              "on-tertiary": "#2f3035",
+              "on-tertiary-container": "#5d5f64",
+              "on-primary-container": "#006970",
+              "secondary-fixed-dim": "#adc6ff",
+              "error-container": "#93000a",
+              "tertiary": "#f6f5fb",
+              "on-surface-variant": "#b9cacb",
+              "secondary-fixed": "#d8e2ff",
+              "surface-dim": "#0a1323",
+              "surface-container-low": "#121c2c",
+              "surface-container-high": "#212a3b",
+              "on-error": "#690005",
+              "on-secondary-fixed-variant": "#004395",
+              "on-tertiary-fixed-variant": "#45474b",
+              "on-primary-fixed": "#002022",
+              "error": "#ffb4ab",
+              "on-background": "#dae2f9",
+              "on-secondary-container": "#e6ecff",
+              "on-error-container": "#ffdad6",
+              "background": "#0a1323",
+              "secondary": "#adc6ff",
+              "on-primary": "#00363a",
+              "outline-variant": "#3b494b",
+              "inverse-surface": "#dae2f9",
+              "inverse-on-surface": "#283142",
+              "inverse-primary": "#006970",
+              "outline": "#849495",
+              "primary-container": "#00f0ff",
+              "on-primary-fixed-variant": "#004f54",
+              "surface-container-lowest": "#050e1e",
+              "tertiary-fixed": "#e2e2e8",
+              "on-surface": "#dae2f9",
+              "surface-container": "#172030"
+            },
+            "borderRadius": {
+              "DEFAULT": "0.25rem",
+              "lg": "0.5rem",
+              "xl": "0.75rem",
+              "full": "9999px"
+            },
+            "spacing": {
+              "margin-mobile": "16px",
+              "margin-desktop": "32px",
+              "grid-overlay": "24px",
+              "gutter": "16px",
+              "base": "4px"
+            },
+            "fontFamily": {
+              "label-caps": ["JetBrains Mono"],
+              "data-lg": ["JetBrains Mono"],
+              "body-md": ["Inter"],
+              "headline-lg": ["Outfit"],
+              "data-sm": ["JetBrains Mono"],
+              "headline-md": ["Outfit"]
+            },
+            "fontSize": {
+              "label-caps": ["10px", {"lineHeight": "1.2", "letterSpacing": "0.1em", "fontWeight": "700"}],
+              "data-lg": ["18px", {"lineHeight": "1.4", "letterSpacing": "0em", "fontWeight": "500"}],
+              "body-md": ["14px", {"lineHeight": "1.5", "letterSpacing": "0em", "fontWeight": "400"}],
+              "headline-lg": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+              "data-sm": ["12px", {"lineHeight": "1.4", "letterSpacing": "0.02em", "fontWeight": "400"}],
+              "headline-md": ["24px", {"lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "600"}]
+            }
+          },
+        },
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>
