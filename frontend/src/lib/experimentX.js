@@ -1,10 +1,7 @@
 import {
-  getAddress,
-  getNetworkDetails,
-  isConnected,
-  setAllowed,
-  signTransaction
-} from "@stellar/freighter-api";
+  StellarWalletsKit,
+  Networks
+} from "@creit.tech/stellar-wallets-kit";
 import { experimentXConfig } from "./contract-config.js";
 
 export const EXPERIMENT_STATUS = {
@@ -34,6 +31,12 @@ export const configuredNetworkPassphrase =
 export const configuredRpcUrl =
   import.meta.env.VITE_STELLAR_RPC_URL || "https://soroban-testnet.stellar.org";
 export const contractLimits = experimentXConfig.limits;
+
+export const kit = new StellarWalletsKit({
+  network: Networks.TESTNET,
+  selectedWalletId: "freighter",
+  modules: [],
+});
 
 let stellarSdkPromise;
 
@@ -114,12 +117,19 @@ async function buildClient(account = "") {
 
   const { contract: StellarContract } = await loadStellarSdk();
 
+  const customSignTransaction = async (xdr) => {
+    const { signedXDR } = await kit.signTransaction(xdr, {
+      networkPassphrase: configuredNetworkPassphrase
+    });
+    return signedXDR;
+  };
+
   return StellarContract.Client.from({
     contractId: configuredContractId,
     rpcUrl: configuredRpcUrl,
     networkPassphrase: configuredNetworkPassphrase,
     publicKey: account || undefined,
-    signTransaction
+    signTransaction: customSignTransaction
   });
 }
 
@@ -203,25 +213,6 @@ async function normalizeEvent(event) {
     topics,
     summary: eventSummary(topics, payload),
     payload
-  };
-}
-
-async function getWalletSnapshot() {
-  const [addressResult, networkResult] = await Promise.all([getAddress(), getNetworkDetails()]);
-
-  if (addressResult.error) {
-    throw new Error(addressResult.error.message);
-  }
-
-  if (networkResult.error) {
-    throw new Error(networkResult.error.message);
-  }
-
-  return {
-    account: addressResult.address,
-    network: networkResult.network,
-    networkPassphrase: networkResult.networkPassphrase,
-    rpcUrl: networkResult.sorobanRpcUrl || configuredRpcUrl
   };
 }
 
@@ -342,30 +333,42 @@ export function parseError(error) {
 }
 
 export async function discoverWalletState() {
-  const connection = await isConnected();
-  if (connection.error || !connection.isConnected) {
-    return {
-      account: "",
-      network: "",
-      networkPassphrase: "",
-      rpcUrl: configuredRpcUrl
-    };
+  try {
+    const publicKey = await kit.getPublicKey();
+    if (publicKey) {
+      return {
+        account: publicKey,
+        network: "TESTNET",
+        networkPassphrase: configuredNetworkPassphrase,
+        rpcUrl: configuredRpcUrl
+      };
+    }
+  } catch (e) {
+    // ignore
   }
 
-  return getWalletSnapshot();
+  return {
+    account: "",
+    network: "",
+    networkPassphrase: "",
+    rpcUrl: configuredRpcUrl
+  };
 }
 
 export async function connectWallet() {
-  const permission = await setAllowed();
-  if (permission.error) {
-    throw new Error(permission.error.message);
-  }
+  await kit.openModal({
+    onWalletSelected: async (option) => {
+      kit.setWallet(option.id);
+    }
+  });
 
-  if (!permission.isAllowed) {
-    throw new Error("Freighter did not grant access to this app.");
-  }
-
-  return getWalletSnapshot();
+  const publicKey = await kit.getPublicKey();
+  return {
+    account: publicKey,
+    network: "TESTNET",
+    networkPassphrase: configuredNetworkPassphrase,
+    rpcUrl: configuredRpcUrl
+  };
 }
 
 export async function readDashboard(account) {
@@ -545,17 +548,12 @@ export async function sendXlmTransaction(account, destination, amount) {
     .setTimeout(30)
     .build();
 
-  const signedTxResponse = await signTransaction(tx.toXDR(), {
-    network: "TESTNET",
+  const { signedXDR } = await kit.signTransaction(tx.toXDR(), {
     networkPassphrase: Networks.TESTNET
   });
-  
-  if (signedTxResponse.error) {
-      throw new Error(signedTxResponse.error);
-  }
 
   const { TransactionBuilder: TB2 } = await loadStellarSdk();
-  const assembledTx = TB2.fromXDR(signedTxResponse, Networks.TESTNET);
+  const assembledTx = TB2.fromXDR(signedXDR, Networks.TESTNET);
 
   const sentTx = await server.submitTransaction(assembledTx);
   return {
