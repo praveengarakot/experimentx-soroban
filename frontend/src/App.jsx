@@ -546,7 +546,7 @@ export default function App() {
                 onClick={handleConnectWallet}
                 disabled={wallet.isConnecting}
               >
-                {wallet.isConnecting ? "Connecting..." : "Connect Freighter"}
+                {wallet.isConnecting ? "Connecting..." : "Connect Wallet"}
               </button>
             )}
             <div className="hero-badges">
