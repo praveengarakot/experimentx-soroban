@@ -35,4 +35,24 @@ describe('App', () => {
     render(<App />);
     expect(screen.getByText(/Connect Wallet/i)).toBeDefined();
   });
+
+  it('renders the application brand title', () => {
+    render(<App />);
+    expect(screen.getByText(/On-chain self-experiment studio/i)).toBeDefined();
+  });
+
+  it('renders the Live status indicator banner', () => {
+    render(<App />);
+    expect(screen.getByText(/Live status/i)).toBeDefined();
+  });
+
+  it('renders the Send XLM panel section', () => {
+    render(<App />);
+    expect(screen.getAllByText(/Send XLM/i).length).toBeGreaterThan(0);
+  });
+
+  it('renders the active experiments metric card', () => {
+    render(<App />);
+    expect(screen.getAllByText(/Active experiments/i).length).toBeGreaterThan(0);
+  });
 });
