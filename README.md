@@ -40,7 +40,7 @@ This repository represents the fulfillment of **Level 1 (White Belt)**, **Level 
 - [x] **Open Source:** Public GitHub repository under `praveengarakot`.
 
 ### Level 2 — Yellow Belt (Contract Integration)
-- [x] **Wallet Integration:** Robust wallet connection flow handling missing Freighter extensions and incorrect network selection.
+- [x] **Wallet Integration:** Robust wallet connection flow supporting multiple wallets via `@creit.tech/stellar-wallets-kit`.
 - [x] **Error Handling:** Gracefully catches and displays errors for: (1) Missing wallet extension, (2) Wrong network, and (3) Contract validation failures.
 - [x] **Smart Contract Integration:** Fully functional Soroban contract deployed to the Stellar testnet.
 - [x] **Frontend Contract Calls:** UI seamlessly invokes contract writes (`save_profile`, `create_experiment`, `log_compliance`) and reads (`get_dashboard`, `get_experiment`).
@@ -49,11 +49,12 @@ This repository represents the fulfillment of **Level 1 (White Belt)**, **Level 
 
 ### Level 3 — Orange Belt (Advanced Engineering)
 - [x] **Advanced Smart Contract:** Complex state management (tracking days, streaks, compliance rates) and comprehensive contract methods.
+- [x] **Inter-Contract Communication (ICC):** Integrates a secondary `badge_registry` contract. When an experimenter successfully completes an experiment, `experiment_x` automatically invokes `award_badge` via ICC to mint a badge.
 - [x] **Event Streaming:** React frontend continuously polls the Soroban RPC for live contract events (`profile_saved`, `compliance_logged`), parsing XDR into readable public activity feeds without needing a wallet connection.
 - [x] **CI/CD Pipeline:** Fully configured GitHub Actions workflow (`.github/workflows/ci.yml`) handling automated Rust contract builds and React frontend checks on every push.
 - [x] **Deployment Workflow:** Automated scripts for contract deployment and frontend config injection.
 - [x] **Mobile Responsiveness:** A highly polished, custom-built CSS architecture utilizing grid layouts, flexbox, and dynamic media queries to ensure 100% mobile compatibility.
-- [x] **Error Boundaries & Load States:** Uses React Query with optimistic UI loading states and skeleton loaders for smooth async operations.
+- [x] **Frontend Tests:** Unit testing environment established with `Vitest` to verify component rendering and core application logic.
 - [x] **Production Architecture:** Monorepo configuration linking Rust workspaces and Vite.js frontend pipelines cleanly.
 
 ---
@@ -61,7 +62,7 @@ This repository represents the fulfillment of **Level 1 (White Belt)**, **Level 
 ## Architecture
 
 ### Smart contract
-Location: [`contracts/experiment_x/src/lib.rs`](./contracts/experiment_x/src/lib.rs)
+Location: [`contracts/experiment_x/src/lib.rs`](./contracts/experiment_x/src/lib.rs) and [`contracts/badge_registry/src/lib.rs`](./contracts/badge_registry/src/lib.rs)
 
 Core methods:
 - `save_profile(experimenter, display_name)`
@@ -81,9 +82,9 @@ Validation:
 Location: [`frontend/src`](./frontend/src)
 
 Stack:
-- React + Vite
+- React + Vite + Vitest
 - TanStack Query
-- Freighter wallet integration (`@stellar/freighter-api`)
+- Multi-wallet integration via `@creit.tech/stellar-wallets-kit`
 - Soroban RPC reads and writes through `@stellar/stellar-sdk`
 
 ---
