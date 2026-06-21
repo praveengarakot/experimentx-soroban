@@ -1,6 +1,6 @@
 #![no_std]
 
-use soroban_sdk::{contract, contractevent, contractimpl, contracttype, Address, Env, String};
+use soroban_sdk::{contract, contractevent, contractimpl, contracttype, Address, Env, String, Symbol, vec, IntoVal};
 
 const DAY_IN_SECONDS: u64 = 86_400;
 const STATUS_ACTIVE: u32 = 0;
@@ -132,6 +132,8 @@ enum DataKey {
     Experiment(Address, u32),
     RegisteredExperimenter(Address),
     GlobalStats,
+    Admin,
+    BadgeRegistry,
 }
 
 #[contract]
@@ -139,6 +141,20 @@ pub struct ExperimentX;
 
 #[contractimpl]
 impl ExperimentX {
+    pub fn init_admin(env: Env, admin: Address) {
+        if env.storage().persistent().has(&DataKey::Admin) {
+            panic!("Admin already set");
+        }
+        env.storage().persistent().set(&DataKey::Admin, &admin);
+    }
+
+    pub fn set_badge_registry(env: Env, admin: Address, registry_id: Address) {
+        admin.require_auth();
+        let stored_admin: Address = env.storage().persistent().get(&DataKey::Admin).unwrap();
+        assert!(admin == stored_admin, "Unauthorized");
+        env.storage().persistent().set(&DataKey::BadgeRegistry, &registry_id);
+    }
+
     pub fn save_profile(env: Env, experimenter: Address, display_name: String) {
         experimenter.require_auth();
         validate_display_name(&display_name);
@@ -519,6 +535,18 @@ fn finalize_experiment_state(
             missed_days: experiment.missed_days,
         }
         .publish(env);
+    }
+
+    if successful {
+        if let Some(registry_id) = env.storage().persistent().get::<_, Address>(&DataKey::BadgeRegistry) {
+            let badge_name = String::from_str(env, "Completion Badge");
+            let args = vec![
+                env,
+                experimenter.into_val(env),
+                badge_name.into_val(env),
+            ];
+            env.invoke_contract::<()>(&registry_id, &Symbol::new(env, "award_badge"), args);
+        }
     }
 }
 
